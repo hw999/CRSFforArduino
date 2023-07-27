@@ -32,6 +32,14 @@
 
 #include "Arduino.h"
 
+#if defined(SERIAL_RX_BUFFER_SIZE) && defined(SERIAL_TX_BUFFER_SIZE)
+// CRSF for Arduino needs a 64 byte buffer to receive CRSF frames.
+static_assert((SERIAL_RX_BUFFER_SIZE >= 64) && (SERIAL_TX_BUFFER_SIZE >= 64), "CRSF for Arduino needs a 64 byte buffer to send & receive CRSF frames.");
+#elif defined(SERIAL_BUFFER_SIZE)
+// CRSF for Arduino needs a 64 byte buffer to send & receive CRSF frames.
+static_assert(SERIAL_BUFFER_SIZE >= 64, "CRSF for Arduino needs a 64 byte buffer to receive CRSF frames.");
+#endif
+
 #ifdef USE_DMA
 #include "Adafruit_ZeroDMA.h"
 #endif
