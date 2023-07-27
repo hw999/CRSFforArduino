@@ -36,32 +36,41 @@
 
 #include "CRSFforArduino.h"
 
+/* Configuration Options. */
+#define VIEW_RC_CHANNELS 0 // Set VIEW_RC_CHANNELS to 1 to view the RC channel data in the serial monitor.
+
 CRSFforArduino crsf = CRSFforArduino(&Serial1);
 
 void setup()
 {
+#if VIEW_RC_CHANNELS > 0 || defined(CRSF_DEBUG)
     // Initialize the serial port & wait for the port to open.
     Serial.begin(115200);
     while (!Serial)
     {
         ;
     }
+#endif
 
     // Initialize the CRSFforArduino library.
     if (!crsf.begin())
     {
+#if VIEW_RC_CHANNELS > 0 || defined(CRSF_DEBUG)
         Serial.println("CRSF for Arduino initialization failed!");
+#endif
         while (1)
         {
             ;
         }
     }
 
+#if VIEW_RC_CHANNELS > 0 || defined(CRSF_DEBUG)
     // Show the user that the sketch is ready.
     Serial.println("RC Channels Example");
     delay(1000);
     Serial.println("Ready");
     delay(1000);
+#endif
 }
 
 void loop()
@@ -69,6 +78,7 @@ void loop()
     if (crsf.update())
     {
 
+#if VIEW_RC_CHANNELS > 0 || defined(CRSF_DEBUG)
         /* Print RC channels every 100 ms. Do this using the millis() function to avoid blocking the main loop. */
         static unsigned long lastPrint = 0;
         if (millis() - lastPrint >= 100)
@@ -92,6 +102,7 @@ void loop()
             Serial.print(crsf.rcToUs(crsf.getChannel(8)));
             Serial.println(">");
         }
+#endif
     }
 }
 #endif // defined(ARDUINO) && defined(PLATFORMIO)
