@@ -35,6 +35,14 @@
 #define VIEW_RC_CHANNELS         0 // Set VIEW_RC_CHANNELS to 1 to view the RC channel data in the serial monitor.
 #define GENERATE_RANDOM_GPS_DATA 0 // Set GENERATE_RANDOM_GPS_DATA to 1 to generate random GPS telemetry data.
 
+/* CRSF Hardware Serial Port. */
+#if defined(USBCON) || defined(SERIAL_PORT_HARDWARE1)
+#define CRSF_RC_SERIAL Serial1
+#else
+#warning "CRSF for Arduino is using the same serial port as the onboard USB-to-Serial adapter. Therefore, things like 'Serial.print()' will not work."
+#define CRSF_RC_SERIAL Serial
+#endif
+
 uint32_t timeNow = 0;
 
 /* Initialise the GPS telemetry data with default values. */
@@ -45,7 +53,7 @@ float speed = 500.0F;                 // Speed is in cm/s
 float groundCourse = 275.8F;          // Ground Course is in degrees.
 uint8_t satellites = 4;
 
-CRSFforArduino crsf = CRSFforArduino(&Serial1);
+CRSFforArduino crsf = CRSFforArduino(&CRSF_RC_SERIAL);
 
 void setup()
 {
