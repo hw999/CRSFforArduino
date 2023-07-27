@@ -413,7 +413,7 @@ void CRSFforArduino::telemetryWriteGPS(float latitude, float longitude, float al
     _telemetryData.gps.longitude = longitude * 10000000;
 
     // Altitude is in centimetres. Convert it to metres, then constrain it to 0-5000m with an offset of 1000m.
-    _telemetryData.gps.altitude = (constrain(altitude, 0, 5000 * 100) / 100) + 1000;
+    _telemetryData.gps.altitude = (constrain(altitude, 0, 5000L * 100L) / 100) + 1000;
 
     // Ground speed is in cm/s.
     _telemetryData.gps.speed = ((speed * 36 + 50) / 100);
