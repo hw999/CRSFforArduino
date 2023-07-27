@@ -60,6 +60,11 @@ class CompatibilityTable
         // Adafruit SAME51 boards.
         DEVBOARD_ADAFRUIT_FEATHER_M4_CAN,
 
+        // Arduino AVR boards.
+        DEVBOARD_ARDUINO_MEGA2560,
+        DEVBOARD_ARDUINO_MICRO,
+        DEVBOARD_ARDUINO_UNO,
+
         // Arduino SAMD21 boards.
         DEVBOARD_ARDUINO_MKR1000,
         DEVBOARD_ARDUINO_MKRFOX1200,
@@ -105,6 +110,9 @@ class CompatibilityTable
         "Adafruit Metro M4 AirLift Lite",
         "Adafruit Metro M4 Express",
         "Adafruit Feather M4 CAN",
+        "Arduino Mega 2560",
+        "Arduino Micro",
+        "Arduino Uno",
         "Arduino MKR1000",
         "Arduino MKRFOX1200",
         "Arduino MKRGSM1400",

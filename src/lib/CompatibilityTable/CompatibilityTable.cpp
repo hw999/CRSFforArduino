@@ -172,6 +172,47 @@ CompatibilityTable::CompatibilityTable()
     device.type.devboard = DEVBOARD_IS_INCOMPATIBLE;
 #endif // ARDUINO_SAMD_ADAFRUIT
 
+// Arduino AVR Architecture
+#elif defined(ARDUINO_ARCH_AVR)
+
+// Arduino devboards
+#if USB_VID == 0x2341
+
+// Arduino Micro
+#if USB_PID == 0x8037
+    device.type.devboard = DEVBOARD_ARDUINO_MICRO;
+#else // Incompatible devboards
+#warning "Devboard not supported. Please check the compatibility table."
+    device.type.devboard = DEVBOARD_IS_INCOMPATIBLE;
+#endif
+
+#else // Devboards with no native USB support
+
+#if defined(__AVR_ATmega328P__)
+// Arduino Uno
+#if defined(ARDUINO_AVR_UNO)
+    device.type.devboard = DEVBOARD_ARDUINO_UNO;
+#else // Incompatible devboards
+#warning "Devboard not supported. Please check the compatibility table."
+    device.type.devboard = DEVBOARD_IS_INCOMPATIBLE;
+#endif
+
+#elif defined(__AVR_ATmega2560__)
+    // Arduino Mega 2560
+#if defined(ARDUINO_AVR_MEGA2560)
+    device.type.devboard = DEVBOARD_ARDUINO_MEGA2560;
+#else // Incompatible devboards
+#warning "Devboard not supported. Please check the compatibility table."
+    device.type.devboard = DEVBOARD_IS_INCOMPATIBLE;
+#endif
+
+#else // Incompatible devboards
+#warning "Devboard not supported. Please check the compatibility table."
+    device.type.devboard = DEVBOARD_IS_INCOMPATIBLE;
+#endif
+
+#endif
+
 #else // Unsupported architecture
 #error "Unsupported architecture. Please check the compatibility table."
     device.type.devboard = DEVBOARD_IS_INCOMPATIBLE;
