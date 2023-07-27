@@ -39,7 +39,15 @@
 /* Configuration Options. */
 #define VIEW_RC_CHANNELS 0 // Set VIEW_RC_CHANNELS to 1 to view the RC channel data in the serial monitor.
 
-CRSFforArduino crsf = CRSFforArduino(&Serial1);
+/* CRSF Hardware Serial Port. */
+#if defined(USBCON) || defined(SERIAL_PORT_HARDWARE1)
+#define CRSF_RC_SERIAL Serial1
+#else
+#warning "CRSF for Arduino is using the same serial port as the onboard USB-to-Serial adapter. Therefore, things like 'Serial.print()' will not work."
+#define CRSF_RC_SERIAL Serial
+#endif
+
+CRSFforArduino crsf = CRSFforArduino(&CRSF_RC_SERIAL);
 
 void setup()
 {
