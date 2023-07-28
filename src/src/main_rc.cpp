@@ -58,6 +58,8 @@ void setup()
     {
         ;
     }
+
+    Serial.println("RC Channels Example");
 #endif
 
     // Initialize the CRSFforArduino library.
@@ -74,8 +76,6 @@ void setup()
 
 #if VIEW_RC_CHANNELS > 0 || defined(CRSF_DEBUG)
     // Show the user that the sketch is ready.
-    Serial.println("RC Channels Example");
-    delay(1000);
     Serial.println("Ready");
     delay(1000);
 #endif
