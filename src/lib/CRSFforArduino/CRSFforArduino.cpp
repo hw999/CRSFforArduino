@@ -255,8 +255,20 @@ bool CRSFforArduino::update()
         const int fullFrameLength = _crsfFrame.frame.frameLength + CRSF_FRAME_LENGTH_ADDRESS + CRSF_FRAME_LENGTH_FRAMELENGTH;
         const uint8_t crc = _crsfFrameCRC();
 
+#ifdef CRSF_DEBUG
+        static uint32_t crsfFramesPassed = 0;
+        static uint32_t crsfFramesFailed = 0;
+        static uint32_t _crsfDebugTimer = millis();
+#endif
+
         if (crc == _crsfFrame.raw[fullFrameLength - 1])
         {
+
+#ifdef CRSF_DEBUG
+            // Increment the Frames Passed counter.
+            crsfFramesPassed++;
+#endif
+
             // Check if the packet is a CRSF frame.
             if (_crsfFrame.frame.deviceAddress == CRSF_ADDRESS_FLIGHT_CONTROLLER)
             {
@@ -281,6 +293,25 @@ bool CRSFforArduino::update()
                 _telemetryProcessFrame();
             }
         }
+
+#ifdef CRSF_DEBUG
+        else
+        {
+            // Increment the Frames Failed counter.
+            crsfFramesFailed++;
+        }
+
+        // Print the CRSF statistics.
+        if (millis() - _crsfDebugTimer >= 1000)
+        {
+            Serial.print("[CRSF for Arduino | DEBUG] CRSF Frames Passed: ");
+            Serial.print(crsfFramesPassed);
+            Serial.print(" | CRSF Frames Failed: ");
+            Serial.println(crsfFramesFailed);
+            _crsfDebugTimer = millis();
+        }
+#endif
+        
 
         // Clear the buffer.
         memset(_crsfFrame.raw, 0, CRSF_FRAME_SIZE_MAX);
