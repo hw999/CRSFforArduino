@@ -77,7 +77,7 @@ void setup()
 #if VIEW_RC_CHANNELS > 0 || defined(CRSF_DEBUG)
     // Show the user that the sketch is ready.
     Serial.println("Ready");
-    delay(1000);
+    delay(3000);
 #endif
 }
 
