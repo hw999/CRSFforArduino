@@ -302,6 +302,17 @@ class CRSFforArduino
     void _flushSerial(void);
 };
 
+/* CRSF Hardware Serial Port. */
+#if defined(USBCON) || defined(SERIAL_PORT_HARDWARE1)
+#define CRSF_RC_SERIAL Serial1
+#else
+#warning "CRSF for Arduino is using the same serial port as the onboard USB-to-Serial adapter. Therefore, things like 'Serial.print()' will not work."
+#define CRSF_RC_SERIAL Serial
+#endif
+
+/* CRSF for Arduino Object. */
+CRSFforArduino crsf __attribute__((weak)) = CRSFforArduino(&CRSF_RC_SERIAL);
+
 #ifdef USE_DMA
 /**
  * @brief DMA RX transfer done callback.
