@@ -75,7 +75,7 @@ void loop()
 {
     crsf.update();
 
-#if VIEW_RC_CHANNELS > 0
+#if VIEW_RC_CHANNELS > 0 && !defined(CRSF_DEBUG)
     /* Print RC channels every 100 ms. Do this using the millis() function to avoid blocking the main loop. */
     static unsigned long lastPrint = 0;
     if (millis() - lastPrint >= 100)

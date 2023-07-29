@@ -119,7 +119,7 @@ void loop()
     crsf.update();
 
 /* You can process RC channel data here. */
-#if VIEW_RC_CHANNELS > 0
+#if VIEW_RC_CHANNELS > 0 && !defined(CRSF_DEBUG)
     static unsigned long lastPrint = 0;
     if (timeNow - lastPrint >= 100)
     {
