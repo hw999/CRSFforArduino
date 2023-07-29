@@ -37,7 +37,7 @@
 #include "CRSFforArduino.h"
 
 /* Configuration Options. */
-#define VIEW_RC_CHANNELS 0 // Set VIEW_RC_CHANNELS to 1 to view the RC channel data in the serial monitor.
+#define VIEW_RC_CHANNELS 1 // Set VIEW_RC_CHANNELS to 1 to view the RC channel data in the serial monitor.
 
 void setup()
 {
