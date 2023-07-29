@@ -27,7 +27,8 @@
 #pragma once
 
 #if defined(ARDUINO_ARCH_SAMD)
-#define USE_DMA
+// Disable DMA for now. It's not working.
+// #define USE_DMA
 #endif
 
 #include "Arduino.h"
