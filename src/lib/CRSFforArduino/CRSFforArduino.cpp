@@ -247,74 +247,99 @@ bool CRSFforArduino::update()
     {
         _dmaTransferDone = false;
 #else
-    while (_serial->available() > 0)
+    if (_serial->available() > 0)
     {
         _serial->readBytes(_crsfFrame.raw, CRSF_FRAME_SIZE_MAX);
 #endif
 
+        // Check if the frame length is valid.
         const int fullFrameLength = _crsfFrame.frame.frameLength + CRSF_FRAME_LENGTH_ADDRESS + CRSF_FRAME_LENGTH_FRAMELENGTH;
-        const uint8_t crc = _crsfFrameCRC();
 
-#ifdef CRSF_DEBUG
-        static uint32_t crsfFramesPassed = 0;
-        static uint32_t crsfFramesFailed = 0;
-        static uint32_t _crsfDebugTimer = millis();
-#endif
-
-        if (crc == _crsfFrame.raw[fullFrameLength - 1])
+        // Only process CRSF packets if the full frame length is between 5 & the maximum frame size.
+        if (fullFrameLength >= 5 && fullFrameLength <= CRSF_FRAME_SIZE_MAX)
         {
+            const uint8_t crc = _crsfFrameCRC();
 
 #ifdef CRSF_DEBUG
-            // Increment the Frames Passed counter.
-            crsfFramesPassed++;
+            // static uint32_t crsfFramesPassed = 0;
+            // static uint32_t crsfFramesFailed = 0;
+            // static uint32_t _crsfDebugTimer = millis();
 #endif
 
-            // Check if the packet is a CRSF frame.
-            if (_crsfFrame.frame.deviceAddress == CRSF_ADDRESS_FLIGHT_CONTROLLER)
+            if (crc == _crsfFrame.raw[fullFrameLength - 1])
             {
 
-                // Check if the packet is a CRSF RC frame.
-                if (_crsfFrame.frame.type == CRSF_FRAMETYPE_RC_CHANNELS_PACKED)
-                {
-                    // Read the RC channels.
-                    memcpy(&_crsfRcChannelsPackedFrame, &_crsfFrame, CRSF_FRAME_SIZE_MAX);
+#ifdef CRSF_DEBUG
+                // Increment the Frames Passed counter.
+                // crsfFramesPassed++;
+#endif
 
-                    // Set the packet received flag.
-                    _packetReceived = true;
+                // Check if the packet is a CRSF frame.
+                if (_crsfFrame.frame.deviceAddress == CRSF_ADDRESS_FLIGHT_CONTROLLER)
+                {
+
+                    // Check if the packet is a CRSF RC frame.
+                    if (_crsfFrame.frame.type == CRSF_FRAMETYPE_RC_CHANNELS_PACKED)
+                    {
+                        // Read the RC channels.
+                        memcpy(&_crsfRcChannelsPackedFrame, &_crsfFrame, CRSF_FRAME_SIZE_MAX);
+
+                        // Unpack the RC channels.
+                        const __crsf_rcChannelsPacked_t *rcChannelsPacked = (__crsf_rcChannelsPacked_t *)&_crsfRcChannelsPackedFrame.frame.payload;
+
+                        _channels[RC_CHANNEL_ROLL] = rcChannelsPacked->channel0;
+                        _channels[RC_CHANNEL_PITCH] = rcChannelsPacked->channel1;
+                        _channels[RC_CHANNEL_THROTTLE] = rcChannelsPacked->channel2;
+                        _channels[RC_CHANNEL_YAW] = rcChannelsPacked->channel3;
+                        _channels[RC_CHANNEL_AUX1] = rcChannelsPacked->channel4;
+                        _channels[RC_CHANNEL_AUX2] = rcChannelsPacked->channel5;
+                        _channels[RC_CHANNEL_AUX3] = rcChannelsPacked->channel6;
+                        _channels[RC_CHANNEL_AUX4] = rcChannelsPacked->channel7;
+                        _channels[RC_CHANNEL_AUX5] = rcChannelsPacked->channel8;
+                        _channels[RC_CHANNEL_AUX6] = rcChannelsPacked->channel9;
+                        _channels[RC_CHANNEL_AUX7] = rcChannelsPacked->channel10;
+                        _channels[RC_CHANNEL_AUX8] = rcChannelsPacked->channel11;
+                        _channels[RC_CHANNEL_AUX9] = rcChannelsPacked->channel12;
+                        _channels[RC_CHANNEL_AUX10] = rcChannelsPacked->channel13;
+                        _channels[RC_CHANNEL_AUX11] = rcChannelsPacked->channel14;
+                        _channels[RC_CHANNEL_AUX12] = rcChannelsPacked->channel15;
+
+                        // Set the packet received flag.
+                        _packetReceived = true;
+                    }
                 }
             }
 
-            // Increment the packet counter.
-            _crsfFrameCount = (_crsfFrameCount + 1) % 2;
-
-            // Check if it is time to send telemetry.
-            if (_crsfFrameCount == 0)
-            {
-                _telemetryProcessFrame();
-            }
-        }
-
 #ifdef CRSF_DEBUG
-        else
-        {
-            // Increment the Frames Failed counter.
-            crsfFramesFailed++;
-        }
+            // else
+            // {
+            //     // Increment the Frames Failed counter.
+            //     crsfFramesFailed++;
+            // }
 
-        // Print the CRSF statistics.
-        if (millis() - _crsfDebugTimer >= 1000)
-        {
-            Serial.print("[CRSF for Arduino | DEBUG] CRSF Frames Passed: ");
-            Serial.print(crsfFramesPassed);
-            Serial.print(" | CRSF Frames Failed: ");
-            Serial.println(crsfFramesFailed);
-            _crsfDebugTimer = millis();
-        }
+            // // Print the CRSF statistics.
+            // if (millis() - _crsfDebugTimer >= 1000)
+            // {
+            //     Serial.print("[CRSF for Arduino | DEBUG] CRSF Frames Passed: ");
+            //     Serial.print(crsfFramesPassed);
+            //     Serial.print(" | CRSF Frames Failed: ");
+            //     Serial.println(crsfFramesFailed);
+            //     _crsfDebugTimer = millis();
+            // }
 #endif
-        
+        }
 
         // Clear the buffer.
-        memset(_crsfFrame.raw, 0, CRSF_FRAME_SIZE_MAX);
+        // memset(_crsfFrame.raw, 0, CRSF_FRAME_SIZE_MAX);
+
+        // Increment the packet counter.
+        _crsfFrameCount = (_crsfFrameCount + 1) % 2;
+
+        // Check if it is time to send telemetry.
+        if (_crsfFrameCount == 0)
+        {
+            _telemetryProcessFrame();
+        }
 
 #ifdef USE_DMA
         // Restart the DMA.
@@ -370,32 +395,32 @@ bool CRSFforArduino::packetReceived()
  */
 uint16_t CRSFforArduino::getChannel(uint8_t channel)
 {
-    const __crsf_rcChannelsPacked_t *rcChannelsPacked = (__crsf_rcChannelsPacked_t *)&_crsfRcChannelsPackedFrame.frame.payload;
+    // const __crsf_rcChannelsPacked_t *rcChannelsPacked = (__crsf_rcChannelsPacked_t *)&_crsfRcChannelsPackedFrame.frame.payload;
 
-    // Check if a packet was received.
-    if (_packetReceived == true)
-    {
-        // Unpack the RC channels.
-        _channels[RC_CHANNEL_ROLL] = rcChannelsPacked->channel0;
-        _channels[RC_CHANNEL_PITCH] = rcChannelsPacked->channel1;
-        _channels[RC_CHANNEL_THROTTLE] = rcChannelsPacked->channel2;
-        _channels[RC_CHANNEL_YAW] = rcChannelsPacked->channel3;
-        _channels[RC_CHANNEL_AUX1] = rcChannelsPacked->channel4;
-        _channels[RC_CHANNEL_AUX2] = rcChannelsPacked->channel5;
-        _channels[RC_CHANNEL_AUX3] = rcChannelsPacked->channel6;
-        _channels[RC_CHANNEL_AUX4] = rcChannelsPacked->channel7;
-        _channels[RC_CHANNEL_AUX5] = rcChannelsPacked->channel8;
-        _channels[RC_CHANNEL_AUX6] = rcChannelsPacked->channel9;
-        _channels[RC_CHANNEL_AUX7] = rcChannelsPacked->channel10;
-        _channels[RC_CHANNEL_AUX8] = rcChannelsPacked->channel11;
-        _channels[RC_CHANNEL_AUX9] = rcChannelsPacked->channel12;
-        _channels[RC_CHANNEL_AUX10] = rcChannelsPacked->channel13;
-        _channels[RC_CHANNEL_AUX11] = rcChannelsPacked->channel14;
-        _channels[RC_CHANNEL_AUX12] = rcChannelsPacked->channel15;
+    // // Check if a packet was received.
+    // if (_packetReceived == true)
+    // {
+    //     // Unpack the RC channels.
+    //     _channels[RC_CHANNEL_ROLL] = rcChannelsPacked->channel0;
+    //     _channels[RC_CHANNEL_PITCH] = rcChannelsPacked->channel1;
+    //     _channels[RC_CHANNEL_THROTTLE] = rcChannelsPacked->channel2;
+    //     _channels[RC_CHANNEL_YAW] = rcChannelsPacked->channel3;
+    //     _channels[RC_CHANNEL_AUX1] = rcChannelsPacked->channel4;
+    //     _channels[RC_CHANNEL_AUX2] = rcChannelsPacked->channel5;
+    //     _channels[RC_CHANNEL_AUX3] = rcChannelsPacked->channel6;
+    //     _channels[RC_CHANNEL_AUX4] = rcChannelsPacked->channel7;
+    //     _channels[RC_CHANNEL_AUX5] = rcChannelsPacked->channel8;
+    //     _channels[RC_CHANNEL_AUX6] = rcChannelsPacked->channel9;
+    //     _channels[RC_CHANNEL_AUX7] = rcChannelsPacked->channel10;
+    //     _channels[RC_CHANNEL_AUX8] = rcChannelsPacked->channel11;
+    //     _channels[RC_CHANNEL_AUX9] = rcChannelsPacked->channel12;
+    //     _channels[RC_CHANNEL_AUX10] = rcChannelsPacked->channel13;
+    //     _channels[RC_CHANNEL_AUX11] = rcChannelsPacked->channel14;
+    //     _channels[RC_CHANNEL_AUX12] = rcChannelsPacked->channel15;
 
-        // Clear the packet received flag.
-        _packetReceived = false;
-    }
+    //     // Clear the packet received flag.
+    //     _packetReceived = false;
+    // }
 
     // Return the requested channel.
     return _channels[(channel - 1) % RC_CHANNEL_COUNT];
