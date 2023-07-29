@@ -260,18 +260,18 @@ bool CRSFforArduino::update()
         {
             const uint8_t crc = _crsfFrameCRC();
 
-#ifdef CRSF_DEBUG
-            // static uint32_t crsfFramesPassed = 0;
-            // static uint32_t crsfFramesFailed = 0;
-            // static uint32_t _crsfDebugTimer = millis();
+#if defined(CRSF_DEBUG) && defined(CRSF_DEBUG_FRAMES_CRC_PASSED)
+            static uint32_t crsfFramesPassed = 0;
+            static uint32_t crsfFramesFailed = 0;
+            static uint32_t _crsfDebugTimer = millis();
 #endif
 
             if (crc == _crsfFrame.raw[fullFrameLength - 1])
             {
 
-#ifdef CRSF_DEBUG
+#if defined(CRSF_DEBUG) && defined(CRSF_DEBUG_FRAMES_CRC_PASSED)
                 // Increment the Frames Passed counter.
-                // crsfFramesPassed++;
+                crsfFramesPassed++;
 #endif
 
                 // Check if the packet is a CRSF frame.
@@ -310,22 +310,22 @@ bool CRSFforArduino::update()
                 }
             }
 
-#ifdef CRSF_DEBUG
-            // else
-            // {
-            //     // Increment the Frames Failed counter.
-            //     crsfFramesFailed++;
-            // }
+#if defined(CRSF_DEBUG) && defined(CRSF_DEBUG_FRAMES_CRC_PASSED)
+            else
+            {
+                // Increment the Frames Failed counter.
+                crsfFramesFailed++;
+            }
 
-            // // Print the CRSF statistics.
-            // if (millis() - _crsfDebugTimer >= 1000)
-            // {
-            //     Serial.print("[CRSF for Arduino | DEBUG] CRSF Frames Passed: ");
-            //     Serial.print(crsfFramesPassed);
-            //     Serial.print(" | CRSF Frames Failed: ");
-            //     Serial.println(crsfFramesFailed);
-            //     _crsfDebugTimer = millis();
-            // }
+            // Print the CRSF statistics.
+            if (millis() - _crsfDebugTimer >= 1000)
+            {
+                Serial.print("[CRSF for Arduino | DEBUG] CRSF Frames Passed: ");
+                Serial.print(crsfFramesPassed);
+                Serial.print(" | CRSF Frames Failed: ");
+                Serial.println(crsfFramesFailed);
+                _crsfDebugTimer = millis();
+            }
 #endif
         }
 

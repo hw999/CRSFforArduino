@@ -48,6 +48,10 @@ static_assert(SERIAL_BUFFER_SIZE >= 64, "CRSF for Arduino needs a 64 byte buffer
 // Uncomment this line to enable debug output.
 // #define CRSF_DEBUG
 
+// Uncomment this line to enable debug output for CRSF frames that passed CRC check.
+// This will print the number of received frames that passed CRC check versus the number of frames that failed.
+// #define CRSF_DEBUG_FRAMES_CRC_PASSED
+
 enum __rc_channels_e
 {
     RC_CHANNEL_ROLL = 0,
